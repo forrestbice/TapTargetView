@@ -19,9 +19,11 @@ android {
     }
 }
 
+def supportLibraryVersion = '27.1.1'
+
 dependencies {
     implementation project(':taptargetview')
-    implementation "com.android.support:appcompat-v7:$defSupportLibraryVersion"
-    implementation "com.android.support:design:$defSupportLibraryVersion"
+    implementation "com.android.support:appcompat-v7:${supportLibraryVersion}"
+    implementation "com.android.support:design:${supportLibraryVersion}"
     implementation 'com.facebook.stetho:stetho:1.5.0'
 }
