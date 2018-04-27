@@ -23,7 +23,7 @@ TapTargetView is distributed using [jcenter](https://bintray.com/keepsafesoftwar
    }
    
    dependencies {
-         compile 'com.getkeepsafe.taptargetview:taptargetview:1.9.1'
+         compile 'com.getkeepsafe.taptargetview:taptargetview:1.11.0'
    }
 ```
 
@@ -66,6 +66,8 @@ You may also choose to target your own custom `Rect` with `TapTarget.forBounds(R
 
 Additionally, each color can be specified via a `@ColorRes` or a `@ColorInt`. Functions that have the suffix `Int` take a `@ColorInt`.
 
+*Tip: When targeting a Toolbar item, be careful with Proguard and ensure you're keeping certain fields. See [#180](https://github.com/KeepSafe/TapTargetView/issues/180)*
+
 ### Sequences
 
 You can easily create a sequence of tap targets with `TapTargetSequence`:
@@ -105,6 +107,14 @@ new TapTargetSequence(this)
 A sequence is started via a call to `start()` on the `TapTargetSequence` instance
 
 For more examples of usage, please look at the included sample app.
+
+## Third Party Bindings
+
+### React Native
+Thanks to @prscX, you may now use this library with [React Native](https://github.com/facebook/react-native) via the module [here](https://github.com/prscX/react-native-taptargetview)
+
+### Xamarin
+Thanks to @btripp, you may now use this library via a Xamarin Binding located [here](https://www.nuget.org/packages/Xamarin.TapTargetView).
 
 ## License
 

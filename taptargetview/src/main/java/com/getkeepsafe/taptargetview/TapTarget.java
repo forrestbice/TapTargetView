@@ -92,6 +92,7 @@ public class TapTarget {
   boolean cancelable = true;
   boolean tintTarget = true;
   boolean transparentTarget = false;
+  float descriptionTextAlpha = 0.54f;
 
   boolean useViewBounds = false;
 
@@ -339,6 +340,15 @@ public class TapTarget {
    */
   public TapTarget titleTextDimen(@DimenRes int dimen) {
     this.titleTextDimen = dimen;
+    return this;
+  }
+
+  /** Specify the alpha value [0.0, 1.0] of the description text **/
+  public TapTarget descriptionTextAlpha(float descriptionTextAlpha) {
+    if (descriptionTextAlpha < 0 || descriptionTextAlpha > 1f) {
+      throw new IllegalArgumentException("Given an invalid alpha value: " + descriptionTextAlpha);
+    }
+    this.descriptionTextAlpha = descriptionTextAlpha;
     return this;
   }
 

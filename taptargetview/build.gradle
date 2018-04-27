@@ -4,12 +4,12 @@ apply plugin: 'com.jfrog.bintray'
 
 def libname = 'TapTargetView'
 group = 'com.getkeepsafe.taptargetview'
-version = '1.9.1'
+version = '1.11.0'
 description = 'An implementation of tap targets from the Material Design guidelines for feature discovery'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    compileSdkVersion defCompileSdkVersion
+    buildToolsVersion defBuildToolsVersion
 
     defaultConfig {
         minSdkVersion 14
@@ -17,10 +17,11 @@ android {
 }
 
 def supportLibraryVersion = '25.3.1'
+
 dependencies {
-    compile "com.android.support:support-annotations:$supportLibraryVersion"
-    compile "com.android.support:support-compat:$supportLibraryVersion"
-    compile "com.android.support:appcompat-v7:$supportLibraryVersion"
+    api "com.android.support:support-annotations:${supportLibraryVersion}"
+    api "com.android.support:appcompat-v7:${supportLibraryVersion}"
+    implementation "com.android.support:support-compat:${defSupportLibraryVersion}"
 }
 
 install {

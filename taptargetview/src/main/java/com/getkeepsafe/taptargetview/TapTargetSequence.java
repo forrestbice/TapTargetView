@@ -16,6 +16,9 @@
 package com.getkeepsafe.taptargetview;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -29,9 +32,13 @@ import java.util.Queue;
  * Internally, a FIFO queue is held to dictate which {@link TapTarget} will be shown.
  */
 public class TapTargetSequence {
-  private final Activity activity;
+  private final @Nullable Activity activity;
+  private final @Nullable Dialog dialog;
   private final Queue<TapTarget> targets;
-  private boolean started;
+  private boolean active;
+
+  @Nullable
+  private TapTargetView currentView;
 
   Listener listener;
   boolean considerOuterCircleCanceled;
@@ -61,6 +68,14 @@ public class TapTargetSequence {
   public TapTargetSequence(Activity activity) {
     if (activity == null) throw new IllegalArgumentException("Activity is null");
     this.activity = activity;
+    this.dialog = null;
+    this.targets = new LinkedList<>();
+  }
+
+  public TapTargetSequence(Dialog dialog) {
+    if (dialog == null) throw new IllegalArgumentException("Given null Dialog");
+    this.dialog = dialog;
+    this.activity = null;
     this.targets = new LinkedList<>();
   }
 
@@ -101,18 +116,87 @@ public class TapTargetSequence {
   }
 
   /** Immediately starts the sequence and displays the first target from the queue **/
+  @UiThread
   public void start() {
-    if (targets.isEmpty() || started) {
+    if (targets.isEmpty() || active) {
       return;
     }
 
-    started = true;
+    active = true;
     showNext();
+  }
+
+  /** Immediately starts the sequence from the given targetId's position in the queue */
+  public void startWith(int targetId) {
+    if (active) {
+      return;
+    }
+
+    while (targets.peek() != null && targets.peek().id() != targetId) {
+      targets.poll();
+    }
+
+    TapTarget peekedTarget = targets.peek();
+    if (peekedTarget == null || peekedTarget.id() != targetId) {
+      throw new IllegalStateException("Given target " + targetId + " not in sequence");
+    }
+
+    start();
+  }
+
+  /** Immediately starts the sequence at the specified zero-based index in the queue */
+  public void startAt(int index) {
+    if (active) {
+      return;
+    }
+
+    if (index < 0 || index >= targets.size()) {
+      throw new IllegalArgumentException("Given invalid index " + index);
+    }
+
+    final int expectedSize = targets.size() - index;
+    while (targets.peek() != null && targets.size() != expectedSize) {
+      targets.poll();
+    }
+
+    if (targets.size() != expectedSize) {
+      throw new IllegalStateException("Given index " + index + " not in sequence");
+    }
+
+    start();
+  }
+
+  /**
+   * Cancels the sequence, if the current target is cancelable.
+   * When the sequence is canceled, the current target is dismissed and the remaining targets are
+   * removed from the sequence.
+   * @return whether the sequence was canceled or not
+   */
+  @UiThread
+  public boolean cancel() {
+    if (targets.isEmpty() || !active) {
+      return false;
+    }
+    if (currentView == null || !currentView.cancelable) {
+      return false;
+    }
+    currentView.dismiss(false);
+    active = false;
+    targets.clear();
+    if (listener != null) {
+      listener.onSequenceCanceled(currentView.target);
+    }
+    return true;
   }
 
   void showNext() {
     try {
-      TapTargetView.showFor(activity, targets.remove(), tapTargetListener);
+      TapTarget tapTarget = targets.remove();
+      if (activity != null) {
+        currentView = TapTargetView.showFor(activity, tapTarget, tapTargetListener);
+      } else {
+        currentView = TapTargetView.showFor(dialog, tapTarget, tapTargetListener);
+      }
     } catch (NoSuchElementException e) {
       // No more targets
       if (listener != null) {
